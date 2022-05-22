@@ -1,11 +1,14 @@
+import os
+import sys
+import argparse
 from enum import Enum
 from math import sqrt
 from PIL import Image
 
 
 class Watermark(Enum):
-    DARK: Image = Image.open('watermark-dark.png', formats=('PNG',))
-    LIGHT: Image = Image.open('watermark-light.png', formats=('PNG',))
+    DARK: Image = Image.open('watermark-dark.png', formats=['PNG'])
+    LIGHT: Image = Image.open('watermark-light.png', formats=['PNG'])
 
 
 class Corner(Enum):
@@ -194,15 +197,84 @@ def add_watermark(image: Image, corner: Corner, watermark: Watermark,
     return transparent
 
 
+def add_best_watermark(image: Image, max_width_proportion=0.15, max_height_proportion=0.15, opacity=0.5) -> Image:
+    """
+    Add best suited watermark in best suited corner of the image
+
+    :param image: original image
+    :param max_width_proportion: [0, 1] maximum watermark / image width ratio
+    :param max_height_proportion: [0, 1] maximum watermark / image height ratio
+    :param opacity: opacity of the watermark
+    :return: new image with watermark
+    """
+
+    corner, watermark = best_corner(image, max_width_proportion, max_height_proportion)
+    image_with_watermark = add_watermark(image, corner, watermark, max_width_proportion, max_height_proportion, opacity)
+    return image_with_watermark
+
+
+def handle_directory(dir_path: str, max_width_proportion=0.15, max_height_proportion=0.15, opacity=0.5) -> None:
+    """
+    Add watermarks to all images in directory and save them to a subdirectory
+    Photo is saved in the same format
+
+    :param dir_path: directory with photos
+    :param max_width_proportion: [0, 1] maximum watermark / image width ratio
+    :param max_height_proportion: [0, 1] maximum watermark / image height ratio
+    :param opacity: opacity of the watermark
+    """
+
+    try:
+        os.chdir(dir_path)
+    except OSError:
+        print(f'Could not open {dir_path}, exiting...')
+        sys.exit()
+
+    watermarked_dir = 'with-watermark'
+    try:
+        os.mkdir(watermarked_dir)
+    except FileExistsError:
+        pass
+
+    files = os.listdir()
+
+    print(f'Adding watermarks to photos in {dir_path}')
+
+    for file in files:
+        filename, extension = os.path.splitext(file)
+        if extension in ('.jpg', '.jpeg'):
+            image = Image.open(file)
+            image_with_watermark = add_best_watermark(image, max_width_proportion, max_height_proportion, opacity)
+            image_with_watermark.save(f'{watermarked_dir}/{filename}_watermark{extension}', quality=100)
+            print(f'Added watermark to {file}')
+
+    print(f'Saved all watermarked photos to {dir_path}/{watermarked_dir}')
+
+
 def main():
-    image = Image.open('../sandbox/pies.jpg')
-    c, w = best_corner(image)
-    watermarked_image = add_watermark(image, c, w, max_width_proportion=0.3, max_height_proportion=0.3, opacity=0.2)
-    watermarked_image.save('../sandbox/pies-watermark.jpg')
+    parser = argparse.ArgumentParser(description='Adds watermark to each photo in a folder, supports .jpg files')
+    parser.add_argument('-f', '--folder', dest='folder', default='.', help='Path to a folder with photos', type=str)
+    parser.add_argument('--width', dest='width', default=0.15, help='[0.0, 1.0] Max watermark to image width ratio', type=float)
+    parser.add_argument('--height', dest='height', default=0.15, help='[0.0, 1.0] Max watermark to image height ratio', type=float)
+    parser.add_argument('-o', '--opacity', dest='opacity', default=0.5, help='[0.0, 1.0] Watermark opacity', type=float)
+    args = parser.parse_args()
+
+    if not os.path.exists(args.folder):
+        print(f'{args.folder} does not exist')
+        sys.exit()
+
+    if not os.path.isdir(args.folder):
+        print(f'{args.folder} is not a directory')
+        sys.exit()
+
+    handle_directory(args.folder)
 
 
 if __name__ == '__main__':
     main()
-# TODO: Implement CLI
+
 # TODO: Handling of folders and nested folders via CLI
 # TODO: Optimize by concurrent processing
+# TODO: Support other file formats
+# TODO: Support providing custom watermarks
+# TODO: Support handling single files
