@@ -3,9 +3,9 @@ from math import sqrt
 from PIL import Image
 
 
-class WatermarkType(Enum):
-    DARK = 'dark'
-    LIGHT = 'light'
+class Watermark(Enum):
+    DARK: Image = Image.open('watermark-dark.png', formats=('PNG',))
+    LIGHT: Image = Image.open('watermark-light.png', formats=('PNG',))
 
 
 class Corner(Enum):
@@ -13,27 +13,6 @@ class Corner(Enum):
     UPPER_RIGHT = 'upper right'
     LOWER_LEFT = 'lower left'
     LOWER_RIGHT = 'lower right'
-
-
-def add_watermark(image: Image, watermark: Image) -> Image:
-    pass
-
-
-# def negative():
-#     image = Image.open('../sandbox/sample-image.jpeg')
-#     source = image.split()
-#     R, G, B = 0, 1, 2
-#
-#     red_inv = source[R].point(lambda i: 255-i)
-#     green_inv = source[G].point(lambda i: 255-i)
-#     blue_inv = source[B].point(lambda i: 255-i)
-#
-#     source[R].paste(red_inv, None)
-#     source[G].paste(green_inv, None)
-#     source[B].paste(blue_inv, None)
-#
-#     image = Image.merge(image.mode, source)
-#     image.save('../sandbox/negative.jpg')
 
 
 def cut_corner(image: Image, corner: Corner, width_proportion: float, height_proportion: float) -> Image:
@@ -128,7 +107,7 @@ def colors_stdev(image: Image) -> float:
 
 
 def best_corner(image: Image, width_proportion=0.15, height_proportion=0.15, cutoff_color=128)\
-        -> tuple[Corner, WatermarkType]:
+        -> tuple[Corner, Watermark]:
     """
     Picks the best corner to place watermark in, and either light or dark watermark
     Choice of corner is based on the lowest average standard deviation of colors in the corner
@@ -151,22 +130,79 @@ def best_corner(image: Image, width_proportion=0.15, height_proportion=0.15, cut
         corner_params[corner] = {'std': std, 'avg': avg}
 
     corner, params = min(corner_params.items(), key=lambda c: c[1]['std'])
-    watermark_type = WatermarkType.DARK if params['avg'] > cutoff_color else WatermarkType.LIGHT
-    return corner, watermark_type
+    watermark = Watermark.DARK if params['avg'] > cutoff_color else Watermark.LIGHT
+    return corner, watermark
+
+
+def add_watermark(image: Image, corner: Corner, watermark: Watermark,
+                  max_width_proportion=0.15, max_height_proportion=0.15, opacity=0.5) -> Image:
+    """
+    Returns a new image with watermark added in specified corner
+
+    :param image: original image
+    :param corner: corner where watermark is added
+    :param watermark: watermark to add
+    :param max_width_proportion: [0, 1] maximum watermark / image width ratio
+    :param max_height_proportion: [0, 1] maximum watermark / image height ratio
+    :param opacity: opacity of the watermark
+    :return: new image with watermark
+    """
+    watermark = watermark.value
+
+    max_width = image.width * max_width_proportion
+    max_height = image.height * max_height_proportion
+
+    scale = 1
+    if max_height / max_width < watermark.height / watermark.width:
+        scale = max_height / watermark.height
+    else:
+        scale = max_width / watermark.width
+
+    watermark_width = int(watermark.width * scale)
+    watermark_height = int(watermark.height * scale)
+    watermark = watermark.resize((watermark_width, watermark_height), resample=Image.Resampling.NEAREST)
+    # TODO: compare different filters
+
+    alpha = int(255 * opacity)
+    watermark.putalpha(alpha)
+
+    # leave the blank pixels at 100% transparency
+    transparent_watermark = []
+    for item in watermark.getdata():
+        if item[:3] == (0, 0, 0):
+            transparent_watermark.append((0, 0, 0, 0))
+        else:
+            transparent_watermark.append(item)
+    watermark.putdata(transparent_watermark)
+
+    box = None  # upper left corner
+    match corner:
+        case Corner.UPPER_LEFT:
+            box = (0, 0)
+        case Corner.UPPER_RIGHT:
+            box = (image.width - watermark.width, 0)
+        case Corner.LOWER_LEFT:
+            box = (0, image.height - watermark.height)
+        case Corner.LOWER_RIGHT:
+            box = (image.width - watermark.width, image.height - watermark.height)
+
+    transparent = Image.new(mode='RGBA', size=image.size, color=(0, 0, 0, 0))
+    transparent.paste(image, (0, 0))
+    transparent.paste(watermark, box, watermark)
+    transparent = transparent.convert('RGB')
+
+    return transparent
 
 
 def main():
-    image = Image.open('../sandbox/sample-image.jpeg')
-    watermark = Image.open('../sandbox/sample-watermark.png')
-    image_with_watermark = add_watermark(image, watermark)
-    image_with_watermark.save('../sandbox/sample-image-with-watermark.jpg')
-    c, w = best_corner(image, 0.15, 0.15)
+    image = Image.open('../sandbox/pies.jpg')
+    c, w = best_corner(image)
+    watermarked_image = add_watermark(image, c, w, max_width_proportion=0.3, max_height_proportion=0.3, opacity=0.2)
+    watermarked_image.save('../sandbox/pies-watermark.jpg')
 
 
 if __name__ == '__main__':
     main()
-
-# TODO: Implement adding the watermark
 # TODO: Implement CLI
 # TODO: Handling of folders and nested folders via CLI
 # TODO: Optimize by concurrent processing
