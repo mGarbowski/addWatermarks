@@ -267,7 +267,7 @@ def main():
         print(f'{args.folder} is not a directory')
         sys.exit()
 
-    handle_directory(args.folder)
+    handle_directory(args.folder, args.width, args.height, args.opacity)
 
 
 if __name__ == '__main__':
