@@ -20,7 +20,7 @@ class Corner(Enum):
 
 def cut_corner(image: Image, corner: Corner, width_proportion: float, height_proportion: float) -> Image:
     """
-    Returns a of the image of specified proportions
+    Returns a corner of the image of specified proportions
 
     :param image: Image to cut out from
     :param corner: Corner object
@@ -267,7 +267,7 @@ def main():
         print(f'{args.folder} is not a directory')
         sys.exit()
 
-    handle_directory(args.folder)
+    handle_directory(args.folder, args.width, args.height, args.opacity)
 
 
 if __name__ == '__main__':
