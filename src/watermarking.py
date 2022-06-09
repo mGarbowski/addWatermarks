@@ -23,9 +23,9 @@ def average_colors(image: Image) -> tuple[int, int, int]:
     :return: tuple (red, green, blue)
     """
     red, green, blue = 0, 0, 0
-    pixel_count = image.width * image.height
+    pixel_count = image._width * image.height
 
-    for x in range(image.width):
+    for x in range(image._width):
         for y in range(image.height):
             r, g, b = image.getpixel((x, y))
             red += r
@@ -44,10 +44,10 @@ def colors_stdev(image: Image) -> tuple[float, float, float]:
     """
 
     avg_red, avg_green, avg_blue = average_colors(image)
-    pixel_count = image.width * image.height
+    pixel_count = image._width * image.height
     red, green, blue = 0, 0, 0
 
-    for x in range(image.width):
+    for x in range(image._width):
         for y in range(image.height):
             r, g, b = image.getpixel((x, y))
             red += r ** 2
@@ -71,7 +71,7 @@ def cut_corner(image: Image, corner: Corner, width_proportion: float, height_pro
     :param height_proportion: float [0.0, 1.0]
     :return: Image object representing the corner
     """
-    width = image.width * width_proportion
+    width = image._width * width_proportion
     height = image.height * height_proportion
 
     x_start, x_end, y_start, y_end = None, None, None, None
@@ -83,8 +83,8 @@ def cut_corner(image: Image, corner: Corner, width_proportion: float, height_pro
             y_start = 0
             y_end = height
         case Corner.UPPER_RIGHT:
-            x_start = image.width - width
-            x_end = image.width
+            x_start = image._width - width
+            x_end = image._width
             y_start = 0
             y_end = height
         case Corner.LOWER_LEFT:
@@ -93,8 +93,8 @@ def cut_corner(image: Image, corner: Corner, width_proportion: float, height_pro
             y_start = image.height - height
             y_end = image.height
         case Corner.LOWER_RIGHT:
-            x_start = image.width - width
-            x_end = image.width
+            x_start = image._width - width
+            x_end = image._width
             y_start = image.height - height
             y_end = image.height
 
@@ -120,16 +120,16 @@ def add_watermark(image: Image, corner: Corner, watermark: Image,
     :return: new image with watermark
     """
 
-    max_width = image.width * max_width_proportion
+    max_width = image._width * max_width_proportion
     max_height = image.height * max_height_proportion
 
     scale = 1
-    if max_height / max_width < watermark.height / watermark.width:
+    if max_height / max_width < watermark.height / watermark._width:
         scale = max_height / watermark.height
     else:
-        scale = max_width / watermark.width
+        scale = max_width / watermark._width
 
-    watermark_width = int(watermark.width * scale)
+    watermark_width = int(watermark._width * scale)
     watermark_height = int(watermark.height * scale)
     watermark = watermark.resize((watermark_width, watermark_height), resample=Image.Resampling.NEAREST)
     # TODO: compare different filters
@@ -151,11 +151,11 @@ def add_watermark(image: Image, corner: Corner, watermark: Image,
         case Corner.UPPER_LEFT:
             box = (0, 0)
         case Corner.UPPER_RIGHT:
-            box = (image.width - watermark.width, 0)
+            box = (image._width - watermark._width, 0)
         case Corner.LOWER_LEFT:
             box = (0, image.height - watermark.height)
         case Corner.LOWER_RIGHT:
-            box = (image.width - watermark.width, image.height - watermark.height)
+            box = (image._width - watermark._width, image.height - watermark.height)
 
     image_with_watermark = Image.new(mode='RGBA', size=image.size, color=(0, 0, 0, 0))
     image_with_watermark.paste(image, (0, 0))
