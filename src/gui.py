@@ -4,6 +4,7 @@ from tkinter import filedialog
 from tkinter.messagebox import showinfo
 from tkinter.ttk import Label, Entry
 
+from directory_processors import FlatDirectoryProcessor
 from src.watermarking import Corner
 
 
@@ -36,7 +37,7 @@ class MainBody(ttk.Frame):
         self.directory_info = ttk.Entry(self, textvariable=self.directory)
         self.directory_info.grid(row=1, column=1, columnspan=3, sticky=tk.W)
 
-        self.add_btn = ttk.Button(self, text='ADD', command=lambda: self.watermark_photos)
+        self.add_btn = ttk.Button(self, text='ADD', command=lambda: self.watermark_photos())
         self.add_btn.grid(row=1, column=3)
 
         self.config_menu = ConfigMenu(self)
@@ -47,7 +48,16 @@ class MainBody(ttk.Frame):
         self.directory.set(photos_directory)
 
     def watermark_photos(self):
-        pass
+        processor = FlatDirectoryProcessor(
+            dark_watermark_filepath=self.config_menu.default_dark_watermark,
+            light_watermark_filepath=self.config_menu.default_white_watermark,
+            max_width_proportion=self.config_menu.get_width(),
+            max_height_proportion=self.config_menu.get_height(),
+            opacity=self.config_menu.get_opacity(),
+            corners=self.config_menu.get_corners()
+        )
+
+        processor.handle_directory(self.directory.get())
 
 
 class ConfigMenu(ttk.Frame):
