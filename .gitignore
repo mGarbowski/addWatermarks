@@ -1,3 +1,6 @@
 sandbox
 venv
 .idea
+
+# Test output
+/test/photos/with-watermark/
