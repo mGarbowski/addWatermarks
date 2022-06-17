@@ -3,9 +3,9 @@ from abc import ABC, abstractmethod
 
 from PIL import Image
 
-from corner_pickers import CornerPicker
-from watermark_pickers import WatermarkPicker, WatermarkType
-from watermarking import add_watermark
+from corner_pickers import CornerPicker, RgbStdevCornerPicker
+from watermark_pickers import WatermarkPicker, WatermarkType, AvgRgbWatermarkPicker
+from watermarking import add_watermark, Corner
 
 
 class DirectoryProcessor(ABC):
@@ -13,19 +13,17 @@ class DirectoryProcessor(ABC):
     SUPPORTED_WATERMARK_FILE_FORMATS = ['.png']
 
     def __init__(self,
-                 corner_picker: CornerPicker,
-                 watermark_picker: WatermarkPicker,
                  dark_watermark_filepath: str,
                  light_watermark_filepath: str,
                  max_width_proportion: float,
                  max_height_proportion: float,
-                 opacity: float):
+                 opacity: float,
+                 cutoff_color=150,  # TODO: fine tune the cutoff color
+                 corners: list[Corner] = None):
         """
         Checks if watermark files exists and have a valid format
         TODO: May raise Exception
 
-        :param corner_picker: chosen implementation of CornerPicker interface
-        :param watermark_picker: chosen implementation of WatermarkPicker interface
         :param dark_watermark_filepath: path to a file containing dark watermark
         :param light_watermark_filepath: path to a file containing light watermark
         :param max_width_proportion: [0, 1] maximum watermark / image width ratio
@@ -46,12 +44,33 @@ class DirectoryProcessor(ABC):
         self.dark_watermark = Image.open(dark_watermark_filepath)
         self.light_watermark = Image.open(light_watermark_filepath)
 
-        self.watermark_picker = watermark_picker
-        self.corner_picker = corner_picker
-
+        # Parameters passed down
         self.opacity = opacity
         self.max_height_proportion = max_height_proportion
         self.max_width_proportion = max_width_proportion
+        self.cutoff_color = cutoff_color
+
+        if corners is None:
+            self.corners = [
+                Corner.UPPER_LEFT,
+                Corner.UPPER_RIGHT,
+                Corner.LOWER_LEFT,
+                Corner.LOWER_RIGHT,
+            ]
+        else:
+            self.corners = corners
+
+        # Default implementations
+        self.watermark_picker = AvgRgbWatermarkPicker(
+            max_width_proportion=self.max_width_proportion,
+            max_height_proportion=self.max_height_proportion,
+            cutoff_color=self.cutoff_color
+        )
+        self.corner_picker = RgbStdevCornerPicker(
+            corners=self.corners,
+            max_width_proportion=self.max_width_proportion,
+            max_height_proportion=self.max_height_proportion
+        )
 
     @abstractmethod
     def handle_directory(self, dir_path: str) -> None:
@@ -66,6 +85,8 @@ class DirectoryProcessor(ABC):
 class FlatDirectoryProcessor(DirectoryProcessor):
 
     def handle_directory(self, dir_path: str) -> None:
+        start_dir = os.getcwd()
+
         try:
             os.chdir(dir_path)
         except OSError:
@@ -97,6 +118,7 @@ class FlatDirectoryProcessor(DirectoryProcessor):
                 print(f'Added watermark to {file}')
 
         print(f'Saved all watermarked photos to {dir_path}/{watermarked_dir}')
+        os.chdir(start_dir)
 
 # TODO: Handling of folders and nested folders
 # TODO: Optimize by concurrent processing
