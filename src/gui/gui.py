@@ -3,10 +3,9 @@ from tkinter import ttk
 from tkinter.ttk import Label
 
 from core.directory_processors import FlatDirectoryProcessor
+from core.exceptions import NoneSelectedException
 from gui.browse_menu import BrowseMenu
 from gui.config_menu import ConfigMenu
-from core.exceptions import NoneSelectedException
-from resources.watermarks import DEFAULT_DARK_WATERMARK, DEFAULT_LIGHT_WATERMARK
 
 
 class App(tk.Tk):
@@ -46,8 +45,8 @@ class MainBody(ttk.Frame):
     def watermark_photos(self):
         try:
             processor = FlatDirectoryProcessor(
-                dark_watermark_filepath=DEFAULT_DARK_WATERMARK,
-                light_watermark_filepath=DEFAULT_LIGHT_WATERMARK,
+                dark_watermark_filepath=self.config_menu.get_dark_watermark_filepath(),
+                light_watermark_filepath=self.config_menu.get_light_watermark_filepath(),
                 max_width_proportion=self.config_menu.get_width(),
                 max_height_proportion=self.config_menu.get_height(),
                 opacity=self.config_menu.get_opacity(),
