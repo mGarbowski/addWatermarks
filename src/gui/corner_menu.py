@@ -13,6 +13,10 @@ class CornerConfigMenu(ttk.Frame):
         self.bottom_left = tk.BooleanVar()
         self.bottom_right = tk.BooleanVar()
 
+        # Some default behaviour
+        self.upper_right.set(True)
+        self.upper_left.set(True)
+
         self.upper_left_label = Label(self, text='Upper left')
         self.upper_left_label.grid(row=0, column=0, sticky=tk.W)
         self.upper_left_check = ttk.Checkbutton(self, offvalue=False, onvalue=True, variable=self.upper_left)
@@ -45,4 +49,9 @@ class CornerConfigMenu(ttk.Frame):
         if self.bottom_right.get():
             corners.append(Corner.LOWER_RIGHT)
 
-        return corners
+        if len(corners) == 0:
+            raise NoneSelectedException("Please select at least one corner")
+
+
+class NoneSelectedException(Exception):
+    pass

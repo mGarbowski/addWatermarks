@@ -5,8 +5,9 @@ from tkinter.ttk import Label
 
 from core.directory_processors import FlatDirectoryProcessor
 from resources.watermarks import DEFAULT_DARK_WATERMARK, DEFAULT_LIGHT_WATERMARK
-from .browse_menu import BrowseMenu
-from .config_menu import ConfigMenu
+from gui.browse_menu import BrowseMenu
+from gui.config_menu import ConfigMenu
+from gui.corner_menu import NoneSelectedException
 
 
 class App(tk.Tk):
@@ -58,6 +59,8 @@ class MainBody(ttk.Frame):
         except OSError as err:
             self.set_error_message(str(err))
         except ValueError as err:
+            self.set_error_message(str(err))
+        except NoneSelectedException as err:
             self.set_error_message(str(err))
 
     def set_success_message(self, message: str):
