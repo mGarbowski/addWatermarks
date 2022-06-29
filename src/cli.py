@@ -2,9 +2,7 @@ import argparse
 import os
 import sys
 
-from corner_pickers import RgbStdevCornerPicker
 from directory_processors import FlatDirectoryProcessor
-from watermark_pickers import AvgRgbWatermarkPicker
 from watermarking import Corner
 
 DARK_WATERMARK_FILEPATH = './watermark-dark.png'
@@ -29,14 +27,6 @@ def main():
     if not os.path.isdir(args.folder):
         print(f'{args.folder} is not a directory')
         sys.exit()
-
-    # corner_picker = RgbStdevCornerPicker(corners=DEFAULT_CORNERS,
-    #                                      max_width_proportion=args.width,
-    #                                      max_height_proportion=args.height)
-    #
-    # watermark_picker = AvgRgbWatermarkPicker(max_width_proportion=args.width,
-    #                                          max_height_proportion=args.height,
-    #                                          cutoff_color=DEFAULT_CUTOFF_COLOR)
 
     directory_processor = FlatDirectoryProcessor(
         dark_watermark_filepath=DARK_WATERMARK_FILEPATH,

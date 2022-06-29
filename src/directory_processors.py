@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 from PIL import Image
 
-from corner_pickers import CornerPicker, RgbStdevCornerPicker
-from watermark_pickers import WatermarkPicker, WatermarkType, AvgRgbWatermarkPicker
+from corner_pickers import RgbStdevCornerPicker
+from watermark_pickers import WatermarkType, AvgRgbWatermarkPicker
 from watermarking import add_watermark, Corner
 
 
