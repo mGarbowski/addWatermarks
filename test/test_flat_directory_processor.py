@@ -1,7 +1,7 @@
 import os.path
 import unittest
 
-from directory_processors import FlatDirectoryProcessor
+from core.directory_processors import FlatDirectoryProcessor
 
 
 class TestFlatDirectoryProcessor(unittest.TestCase):
