@@ -5,7 +5,7 @@ from tkinter.messagebox import showinfo
 from tkinter.ttk import Label, Entry
 
 from directory_processors import FlatDirectoryProcessor
-from src.watermarking import Corner
+from watermarking import Corner
 
 
 class App(tk.Tk):
