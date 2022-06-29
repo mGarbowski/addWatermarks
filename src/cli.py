@@ -4,14 +4,18 @@ import sys
 
 from core.directory_processors import FlatDirectoryProcessor
 from core.watermarking import Corner
+from resources.watermarks import WATERMARKS_DIR
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Adds watermark to each photo in a folder, supports .jpg files')
+    parser = argparse.ArgumentParser(description='Adds watermark to each photo in a folder, supports .jpg files.\n'
+                                     + f'Watermark files are located in {WATERMARKS_DIR}.\n'
+                                     + 'GUI for this application is also available, see README.txt for more info.\n')
+
     parser.add_argument('-f', '--folder',
                         dest='folder',
-                        default='.',
                         help='Path to a folder with photos',
+                        required=True,
                         type=str)
     parser.add_argument('--width',
                         dest='width',
@@ -26,14 +30,14 @@ def main():
     parser.add_argument('-o', '--opacity',
                         dest='opacity',
                         default=0.5,
-                        help='[0.0, 1.0] Watermark opacity',
+                        help='[0.0, 1.0] Watermark opacity (0 - transparent, 1 - opaque)',
                         type=float)
-    parser.add_argument('-c', '--corner', '--corners',
+    parser.add_argument('-c', '--corners',
                         dest='corners',
                         default='top',
                         type=str,
                         choices=['all', 'top', 'bottom', 'left', 'right',
-                                 'upper-left', 'upper-right', 'bottom-left', 'bottom-right'],)
+                                 'upper-left', 'upper-right', 'bottom-left', 'bottom-right'])
 
     args = parser.parse_args()
 
