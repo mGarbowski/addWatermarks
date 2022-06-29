@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from PIL import Image
 
-from watermarking import cut_corner, colors_stdev, avg, Corner
+from core.watermarking import cut_corner, colors_stdev, avg, Corner
 
 
 class CornerPicker(ABC):

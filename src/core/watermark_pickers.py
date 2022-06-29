@@ -3,7 +3,7 @@ from enum import Enum
 
 from PIL import Image
 
-from watermarking import Corner, cut_corner, avg, average_colors
+from core.watermarking import Corner, cut_corner, avg, average_colors
 
 
 class WatermarkType(Enum):

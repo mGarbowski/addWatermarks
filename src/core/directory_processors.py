@@ -3,9 +3,10 @@ from abc import ABC, abstractmethod
 
 from PIL import Image
 
-from corner_pickers import RgbStdevCornerPicker
-from watermark_pickers import WatermarkType, AvgRgbWatermarkPicker
-from watermarking import add_watermark, Corner
+from resources.watermarks import DEFAULT_LIGHT_WATERMARK, DEFAULT_DARK_WATERMARK
+from core.corner_pickers import RgbStdevCornerPicker
+from core.watermark_pickers import WatermarkType, AvgRgbWatermarkPicker
+from core.watermarking import add_watermark, Corner
 
 
 class DirectoryProcessor(ABC):
@@ -13,11 +14,11 @@ class DirectoryProcessor(ABC):
     SUPPORTED_WATERMARK_FILE_FORMATS = ['.png']
 
     def __init__(self,
-                 dark_watermark_filepath: str,
-                 light_watermark_filepath: str,
                  max_width_proportion: float,
                  max_height_proportion: float,
                  opacity: float,
+                 dark_watermark_filepath: str = DEFAULT_DARK_WATERMARK,
+                 light_watermark_filepath: str = DEFAULT_LIGHT_WATERMARK,
                  cutoff_color=150,  # TODO: fine tune the cutoff color
                  corners: list[Corner] = None):
         """
@@ -31,14 +32,8 @@ class DirectoryProcessor(ABC):
         :param opacity: opacity of the watermark
         """
 
-        for file_path in (dark_watermark_filepath, light_watermark_filepath):
-            if not os.path.exists(file_path):
-                raise ValueError(f"{file_path} does not exist")
-
-            filename, extension = os.path.splitext(file_path)
-            if extension not in DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS:
-                raise ValueError(f"Supplied file of invalid type - {extension}, "
-                                 f"supported types: {DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS}")
+        DirectoryProcessor.__validate_watermark_filepath(dark_watermark_filepath)
+        DirectoryProcessor.__validate_watermark_filepath(light_watermark_filepath)
 
         # Opening files not checked
         self.dark_watermark = Image.open(dark_watermark_filepath)
@@ -72,6 +67,21 @@ class DirectoryProcessor(ABC):
             max_height_proportion=self.max_height_proportion
         )
 
+    @staticmethod
+    def __validate_watermark_filepath(filepath: str):
+        """
+        Raises value error if the file path does not contain a valid watermark
+
+        :param filepath: path to the watermark file
+        """
+        if not os.path.exists(filepath):
+            raise ValueError(f"{filepath} does not exist")
+
+        filename, extension = os.path.splitext(filepath)
+        if extension not in DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS:
+            raise ValueError(f"Supplied file of invalid type - {extension}, "
+                             f"supported types: {DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS}")
+
     @abstractmethod
     def handle_directory(self, dir_path: str) -> None:
         """
@@ -93,7 +103,7 @@ class FlatDirectoryProcessor(DirectoryProcessor):
             print(f'Could not open {dir_path}, exiting...')
             return
 
-        watermarked_dir = 'with-watermark'
+        watermarked_dir = '../../test/photos/with-watermark'
         try:
             os.mkdir(watermarked_dir)
         except FileExistsError:
