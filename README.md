@@ -1,5 +1,5 @@
 # CLI and GUI utility for automatic photo watermarking
-NOTE: This is and early build, more functionality will be added in the future
+NOTE: This is and early build, more functionality will be added in the future, some functionalities may not work properly
 
 ## Capabilities
 The application chooses the most uniform corner out of those specified by user and then chooses 
