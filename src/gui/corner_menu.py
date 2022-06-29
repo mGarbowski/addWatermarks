@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter.ttk import Label, Checkbutton, Frame
 
+from core.exceptions import NoneSelectedException
 from core.watermarking import Corner
 
 
@@ -49,7 +50,3 @@ class CornerConfigMenu(Frame):
 
         if len(corners) == 0:
             raise NoneSelectedException("Please select at least one corner")
-
-
-class NoneSelectedException(Exception):
-    pass

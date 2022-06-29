@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import filedialog
-from tkinter.ttk import Frame, Label, Button, Entry
+from tkinter.ttk import Frame, Button, Entry
 
 
 class BrowseMenu(Frame):

@@ -1,13 +1,12 @@
 import tkinter as tk
-from tkinter import filedialog
 from tkinter import ttk
 from tkinter.ttk import Label
 
 from core.directory_processors import FlatDirectoryProcessor
-from resources.watermarks import DEFAULT_DARK_WATERMARK, DEFAULT_LIGHT_WATERMARK
 from gui.browse_menu import BrowseMenu
 from gui.config_menu import ConfigMenu
-from gui.corner_menu import NoneSelectedException
+from core.exceptions import NoneSelectedException
+from resources.watermarks import DEFAULT_DARK_WATERMARK, DEFAULT_LIGHT_WATERMARK
 
 
 class App(tk.Tk):
