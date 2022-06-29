@@ -11,7 +11,7 @@ class WatermarkType(Enum):
     LIGHT = 1
 
 
-class WatermarkPicker(ABC):  # TODO: refactor into abstract picker
+class WatermarkPicker(ABC):
     """
     Picks the best watermark to add to a given image
     "best" is determined according to implementation's spec
