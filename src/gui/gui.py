@@ -32,7 +32,7 @@ class MainBody(ttk.Frame):
         self.browse_menu = BrowseMenu(self, self.watermark_photos)
         self.browse_menu.grid(row=2, columnspan=2)
 
-        self.config_menu = ConfigMenu(self)
+        self.config_menu = ConfigMenu(self, error_callback=self.set_error_message)
         self.config_menu.grid(row=3, column=0, sticky=tk.W, padx=25)
 
         self.status_label = Label(self, text="", font=('Helvetica', 12))

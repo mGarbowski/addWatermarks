@@ -2,15 +2,19 @@ import tkinter as tk
 from tkinter.ttk import Frame, Label, Entry
 
 
-class ProportionEntry(Frame):
+class ProportionWidget(Frame):
 
-    def __init__(self, container, default_value: float):
+    def __init__(self, container, label: str, default_value: float):
         super().__init__(container)
+
         self.__value = tk.StringVar()
         self.__value.set(str(default_value))
 
-        self.entry = Entry(self, textvariable=self.__value)
-        self.entry.grid(row=0, column=1, sticky=tk.E)
+        self.label = Label(self, text=label, width=10)
+        self.entry = Entry(self, textvariable=self.__value, width=6)
+
+        self.label.grid(row=0, column=0, sticky=tk.W)
+        self.entry.grid(row=0, column=1, columnspan=2, sticky=tk.E)
 
     @staticmethod
     def __validate_proportion(value):

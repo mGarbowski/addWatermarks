@@ -15,7 +15,7 @@ class WatermarkWidget(Frame):
         self.__filepath = default_filepath
         self.__error_callback = error_callback
 
-        self.__label = Label(self, text=label, width=8)
+        self.__label = Label(self, text=label, width=10)
         self.__status = Label(self, text="Default", width=15)
         self.__button = Button(self, text="Change", command=self.__browse_watermark)
 
