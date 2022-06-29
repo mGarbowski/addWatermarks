@@ -57,15 +57,9 @@ class ConfigMenu(ttk.Frame):
         if ',' in proportion_text:
             proportion_text = proportion_text.replace(',', '.')
 
-        try:
-            proportion = float(proportion_text)
-            if 1 < proportion < 100:
-                proportion = proportion / 100
+        proportion = float(proportion_text)
 
-            if not (0.0 < proportion <= 1.0):
-                raise ValueError('Must be between 1 and 100 or 0 and 1')
+        if not (0.0 < proportion <= 1.0):
+            raise ValueError('Must be between 0 and 1')
 
-            return proportion
-
-        except ValueError as err:
-            showinfo(title='Incorrect value', message=str(err))
+        return proportion

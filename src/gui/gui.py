@@ -36,14 +36,34 @@ class MainBody(ttk.Frame):
         self.config_menu = ConfigMenu(self)
         self.config_menu.grid(row=3, column=0, sticky=tk.W, padx=25)
 
-    def watermark_photos(self):
-        processor = FlatDirectoryProcessor(
-            dark_watermark_filepath=DEFAULT_DARK_WATERMARK,
-            light_watermark_filepath=DEFAULT_LIGHT_WATERMARK,
-            max_width_proportion=self.config_menu.get_width(),
-            max_height_proportion=self.config_menu.get_height(),
-            opacity=self.config_menu.get_opacity(),
-            corners=self.config_menu.get_corners()
-        )
+        self.status_label = Label(self, text="", font=('Helvetica', 12))
+        self.status_label.grid(row=4, pady=20)
 
-        processor.handle_directory(self.browse_menu.get_directory())
+        style = ttk.Style()
+        style.configure("Green.TLabel", foreground="green")
+        style.configure("Error.TLabel", foreground="red")
+
+    def watermark_photos(self):
+        try:
+            processor = FlatDirectoryProcessor(
+                dark_watermark_filepath=DEFAULT_DARK_WATERMARK,
+                light_watermark_filepath=DEFAULT_LIGHT_WATERMARK,
+                max_width_proportion=self.config_menu.get_width(),
+                max_height_proportion=self.config_menu.get_height(),
+                opacity=self.config_menu.get_opacity(),
+                corners=self.config_menu.get_corners()
+            )
+            processor.handle_directory(self.browse_menu.get_directory())
+            self.set_success_message("Watermarks added successfully")
+        except OSError as err:
+            self.set_error_message(str(err))
+        except ValueError as err:
+            self.set_error_message(str(err))
+
+    def set_success_message(self, message: str):
+        self.status_label.configure(text=message)
+        self.status_label.configure(style="Green.TLabel")
+
+    def set_error_message(self, message: str):
+        self.status_label.configure(text=message)
+        self.status_label.configure(style="Error.TLabel")

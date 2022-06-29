@@ -97,11 +97,7 @@ class FlatDirectoryProcessor(DirectoryProcessor):
     def handle_directory(self, dir_path: str) -> None:
         start_dir = os.getcwd()
 
-        try:
-            os.chdir(dir_path)
-        except OSError:
-            print(f'Could not open {dir_path}, exiting...')
-            return
+        os.chdir(dir_path)
 
         watermarked_dir = '../../test/photos/with-watermark'
         try:
@@ -127,7 +123,7 @@ class FlatDirectoryProcessor(DirectoryProcessor):
                 image_with_watermark.save(f'{watermarked_dir}/{filename}_watermark{extension}', quality=100)
                 print(f'Added watermark to {file}')
 
-        print(f'Saved all watermarked photos to {dir_path}/{watermarked_dir}')
+        print(f'Saved all watermarked photos to {dir_path}/{watermarked_dir}')  # TODO: fix log message
         os.chdir(start_dir)
 
 # TODO: Handling of folders and nested folders
