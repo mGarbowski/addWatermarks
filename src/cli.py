@@ -1,16 +1,23 @@
+"""CLI application for adding watermarks
+
+Adds watermark to each photo in a folder. Supports .jpg files.
+It does not modify source files, all watermarked photos are placed in a subdirectory.
+Watermark files are located in src/resources/watermarks/
+
+A more user-friendly graphical application is also available.
+See README.md or the documentation for more information.
+"""
+
 import argparse
 import os
 import sys
 
 from core.directory_processors import FlatDirectoryProcessor
 from core.watermarking import Corner
-from resources.watermarks import WATERMARKS_DIR
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Adds watermark to each photo in a folder, supports .jpg files.\n'
-                                     + f'Watermark files are located in {WATERMARKS_DIR}.\n'
-                                     + 'GUI for this application is also available, see README.txt for more info.\n')
+    parser = argparse.ArgumentParser(description=__doc__)
 
     parser.add_argument('-f', '--folder',
                         dest='folder',

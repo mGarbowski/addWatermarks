@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter.ttk import Label
+from tkinter.ttk import Label, Frame, Style
 
 from core.directory_processors import FlatDirectoryProcessor
 from core.exceptions import NoneSelectedException
@@ -9,6 +8,7 @@ from gui.config_menu import ConfigMenu
 
 
 class App(tk.Tk):
+    """Tkinter graphical application, wrapper around the main logic in :class:`MainBody`"""
 
     def __init__(self):
         super().__init__()
@@ -19,9 +19,15 @@ class App(tk.Tk):
         self.main_body.pack(expand=True, fill='both')
 
 
-class MainBody(ttk.Frame):
+class MainBody(Frame):
+    """Main body of the application
 
-    def __init__(self, container):
+    Container for UI components
+    Manages the main logic of watermarking photos and displaying status messages
+    """
+    # TODO: refactor not to violate the single responsibility rule
+
+    def __init__(self, container: App):
         super().__init__(container)
         self.columnconfigure(0, weight=1)
         self.columnconfigure(1, weight=2)
@@ -32,17 +38,24 @@ class MainBody(ttk.Frame):
         self.browse_menu = BrowseMenu(self, self.watermark_photos)
         self.browse_menu.grid(row=2, columnspan=2)
 
-        self.config_menu = ConfigMenu(self, error_callback=self.set_error_message)
+        self.config_menu = ConfigMenu(self, display_error=self.set_error_message)
         self.config_menu.grid(row=3, column=0, sticky=tk.W, padx=25)
 
         self.status_label = Label(self, text="", font=('Helvetica', 12))
         self.status_label.grid(row=4, pady=20)
 
-        style = ttk.Style()
+        style = Style()
         style.configure("Green.TLabel", foreground="green")
         style.configure("Error.TLabel", foreground="red")
 
-    def watermark_photos(self):
+    def watermark_photos(self) -> None:
+        """
+        Add watermarks to files in the selected directory and display appropriate status message.
+        All Exceptions are handled on this level
+
+        :return: None
+        """
+
         try:
             processor = FlatDirectoryProcessor(
                 dark_watermark_filepath=self.config_menu.get_dark_watermark_filepath(),
@@ -61,10 +74,24 @@ class MainBody(ttk.Frame):
         except NoneSelectedException as err:
             self.set_error_message(str(err))
 
-    def set_success_message(self, message: str):
+    def set_success_message(self, message: str) -> None:
+        """
+        Display success status message
+
+        :param message: text to display
+        :return: None
+        """
+
         self.status_label.configure(text=message)
         self.status_label.configure(style="Green.TLabel")
 
-    def set_error_message(self, message: str):
+    def set_error_message(self, message: str) -> None:
+        """
+        Display error status message
+
+        :param message: text to display
+        :return: None
+        """
+
         self.status_label.configure(text=message)
         self.status_label.configure(style="Error.TLabel")
