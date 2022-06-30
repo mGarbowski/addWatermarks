@@ -10,7 +10,11 @@ Welcome to AddWatermarks's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   main
+   cli
+   core
+   gui
+   resources
 
 
 Indices and tables
