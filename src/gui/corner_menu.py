@@ -6,7 +6,15 @@ from core.watermarking import Corner
 
 
 class CornerConfigMenu(Frame):
-    def __init__(self, container):
+    """
+    UI component with checkboxes for selecting corners where watermarks can be placed
+    """
+
+    def __init__(self, container: Frame):
+        """
+        :param container: parent component
+        """
+
         super().__init__(container)
         self.upper_left = tk.BooleanVar()
         self.upper_right = tk.BooleanVar()
@@ -37,7 +45,13 @@ class CornerConfigMenu(Frame):
         self.bottom_left_check.grid(row=1, column=1)
         self.bottom_right_check.grid(row=1, column=2)
 
-    def get_corners(self):
+    def get_corners(self) -> list[Corner]:
+        """
+        Get selected corners
+
+        :return: list of selected corners
+        :raises NoneSelectedException: when no corners are selected
+        """
         corners = []
         if self.upper_left.get():
             corners.append(Corner.UPPER_LEFT)
@@ -50,3 +64,5 @@ class CornerConfigMenu(Frame):
 
         if len(corners) == 0:
             raise NoneSelectedException("Please select at least one corner")
+
+        return corners
