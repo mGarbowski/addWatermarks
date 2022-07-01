@@ -99,7 +99,7 @@ class FlatDirectoryProcessor(DirectoryProcessor):
 
         os.chdir(dir_path)
 
-        watermarked_dir = '../../test/photos/with-watermark'
+        watermarked_dir = '../../tests/photos/with-watermark'
         try:
             os.mkdir(watermarked_dir)
         except FileExistsError:

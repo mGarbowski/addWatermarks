@@ -3,4 +3,4 @@ venv
 .idea
 
 # Test output
-/test/photos/with-watermark/
+/tests/photos/with-watermark/

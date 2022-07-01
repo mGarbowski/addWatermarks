@@ -61,7 +61,7 @@ def colors_stdev(image: Image) -> tuple[float, float, float]:
     return std_red, std_green, std_blue
 
 
-def cut_corner(image: Image, corner: Corner, width_proportion: float, height_proportion: float) -> Image:
+def cut_corner(image: Image.Image, corner: Corner, width_proportion: float, height_proportion: float) -> Image.Image:
     """
     Returns a corner of the image of specified proportions
 

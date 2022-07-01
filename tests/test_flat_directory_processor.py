@@ -1,5 +1,7 @@
 import os.path
+import sys
 import unittest
+sys.path.append("../src")
 
 from core.directory_processors import FlatDirectoryProcessor
 
@@ -7,13 +9,10 @@ from core.directory_processors import FlatDirectoryProcessor
 class TestFlatDirectoryProcessor(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.watermarks_dir = os.path.abspath('watermarks')
         self.photos_dir = os.path.abspath('photos')
         self.output_dir = os.path.abspath(os.path.join(self.photos_dir, 'with-watermark'))
 
         self.processor = FlatDirectoryProcessor(
-            dark_watermark_filepath=os.path.join(self.watermarks_dir, 'watermark-dark.png'),
-            light_watermark_filepath=os.path.join(self.watermarks_dir, 'watermark-light.png'),
             max_width_proportion=0.3,
             max_height_proportion=0.3,
             opacity=0.5
@@ -22,14 +21,8 @@ class TestFlatDirectoryProcessor(unittest.TestCase):
     def test_instantiated_correctly(self):
         self.assertIsNotNone(self.processor)
 
-        self.assertTrue(os.path.exists(self.photos_dir), msg='Missing test photo resources directory')
-        self.assertTrue(len(os.listdir(self.photos_dir)) > 0, msg='Missing test photos')
-
-        self.assertTrue(os.path.isdir(self.watermarks_dir), msg='Missing test watermark resources')
-        self.assertTrue(os.path.isfile(os.path.join(self.watermarks_dir, 'watermark-light.png')),
-                        msg='Missing light watermark')
-        self.assertTrue(os.path.isfile(os.path.join(self.watermarks_dir, 'watermark-dark.png')),
-                        msg='Missing dark watermark')
+        self.assertTrue(os.path.exists(self.photos_dir), msg='Missing tests photo resources directory')
+        self.assertTrue(len(os.listdir(self.photos_dir)) > 0, msg='Missing tests photos')
 
     def test_creates_output_directory(self):
         self.processor.handle_directory(dir_path=self.photos_dir)
