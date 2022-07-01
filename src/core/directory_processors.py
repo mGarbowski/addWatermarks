@@ -117,7 +117,7 @@ class DirectoryProcessor:
         files = [file for file in directory_contents if os.path.isfile(file)]
         for filepath in files:
             try:
-                self.process_file(filepath, watermarked_dir)
+                self._process_file(filepath, watermarked_dir)
             except NotSupportedFileFormatException as exc:
                 print(f"{exc}, skipping {filepath}")
             except OSError as err:
@@ -131,12 +131,13 @@ class DirectoryProcessor:
         self.light_watermark.close()
         self.light_watermark = None
 
-    def process_file(self, filepath: str, output_directory: str, suffix: str = "_watermark") -> None:
+    def _process_file(self, filepath: str, output_directory: str, suffix: str = "_watermark") -> None:
         """
         Add watermark to a photo and save it in the specified directory.
         Does not modify the original file.
 
-        Requires self.dark_watermark and self.light_watermark to be open
+        Requires self.dark_watermark and self.light_watermark to be open.
+        Use :method:`DirectoryProcessor.process_single_file` as part of the public API
 
         :param filepath: path to the photo to process
         :param output_directory: directory where the processed photo will be saved
@@ -173,6 +174,36 @@ class DirectoryProcessor:
 
         watermarked_image.close()
         image.close()
+
+    def process_single_file(self, filepath: str, output_directory: str, suffix: str = "_watermark") -> None:
+        """
+        Processes a single file, adds watermark and saves in output_directory.
+        Does not modify the original file.
+
+        :param filepath: path to the photo to process
+        :param output_directory: directory where the processed photo will be saved
+        :param suffix: suffix added to the processed photo's filename
+        :raises NotSupportedFileFormatException: if the file format is not supported
+        :raises OSError: if the file could not be written
+        """
+
+        self._open_watermarks()
+        self._process_file(filepath, output_directory, suffix)
+        self._close_watermarks()
+
+    def _open_watermarks(self):
+        if self.dark_watermark is None:
+            self.dark_watermark = Image.open(self.dark_watermark_filepath)
+        if self.light_watermark is None:
+            self.light_watermark = Image.open(self.light_watermark_filepath)
+
+    def _close_watermarks(self):
+        if self.dark_watermark is not None:
+            self.dark_watermark.close()
+            self.dark_watermark = None
+        if self.light_watermark is not None:
+            self.light_watermark.close()
+            self.light_watermark = None
 
 # TODO: Handling of folders and nested folders
 # TODO: Optimize by concurrent processing
