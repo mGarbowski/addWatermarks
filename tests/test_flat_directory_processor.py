@@ -25,11 +25,11 @@ class TestFlatDirectoryProcessor(unittest.TestCase):
         self.assertTrue(len(os.listdir(self.photos_dir)) > 0, msg='Missing tests photos')
 
     def test_creates_output_directory(self):
-        self.processor.handle_directory(dir_path=self.photos_dir)
+        self.processor.process_directory(dir_path=self.photos_dir)
         self.assertTrue(os.path.exists(self.output_dir), msg='Should create output directory')
 
     def test_processes_all_photos(self):
-        self.processor.handle_directory(self.photos_dir)
+        self.processor.process_directory(self.photos_dir)
 
         original_photos = []
         start_dir = os.getcwd()

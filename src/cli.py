@@ -84,7 +84,7 @@ def main():
         corners=corners,
     )
 
-    directory_processor.handle_directory(args.folder)
+    directory_processor.process_directory(args.folder)
 
 
 if __name__ == '__main__':

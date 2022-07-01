@@ -65,7 +65,7 @@ class MainBody(Frame):
                 opacity=self.config_menu.get_opacity(),
                 corners=self.config_menu.get_corners()
             )
-            processor.handle_directory(self.browse_menu.get_directory())
+            processor.process_directory(self.browse_menu.get_directory())
             self.set_success_message("Watermarks added successfully")
         except OSError as err:
             self.set_error_message(str(err))
