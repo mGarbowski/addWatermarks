@@ -21,9 +21,9 @@ class WatermarkPicker(ABC):
 
     def __init__(self, max_width_proportion: float, max_height_proportion: float):
         if not 0 <= max_width_proportion <= 1:
-            raise ValueError('width_proportion must be between [0.0, 1.0]')
+            raise ValueError("width_proportion must be between 0 and 1")
         if not 0 <= max_height_proportion <= 1:
-            raise ValueError('height_proportion must be between [0.0, 1.0]')
+            raise ValueError("height_proportion must be between 0 and 1")
 
         self.max_height_proportion = max_height_proportion
         self.max_width_proportion = max_width_proportion
@@ -44,7 +44,7 @@ class AvgRgbWatermarkPicker(WatermarkPicker):
     Picks the best watermark type based on the average RGB colors value in a given corner
     """
 
-    def __init__(self, max_width_proportion: float, max_height_proportion: float, cutoff_color: int):
+    def __init__(self, max_width_proportion: float, max_height_proportion: float, cutoff_color: int = 150):
         if not 0 <= cutoff_color <= 255:
             raise ValueError("cutoff_color must be a valid RGB color value - integer [0, 255]")
 

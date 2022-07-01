@@ -23,9 +23,11 @@ class CornerPicker(ABC):
         :param max_height_proportion: [0.0, 1.0] maximum watermark / image height ratio
         """
         if not 0 <= max_width_proportion <= 1:
-            raise ValueError('width_proportion must be between [0.0, 1.0]')
+            raise ValueError("width_proportion must be between 0 and 1")
         if not 0 <= max_height_proportion <= 1:
-            raise ValueError('height_proportion must be between [0.0, 1.0]')
+            raise ValueError("height_proportion must be between 0 and 1")
+        if len(corners) < 1:
+            raise ValueError("Must provide at least one corner")
 
         self.height_proportion = max_height_proportion
         self.width_proportion = max_width_proportion
