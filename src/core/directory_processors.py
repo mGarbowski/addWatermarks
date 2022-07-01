@@ -191,13 +191,21 @@ class DirectoryProcessor:
         self._process_file(filepath, output_directory, suffix)
         self._close_watermarks()
 
-    def _open_watermarks(self):
+    def _open_watermarks(self) -> None:
+        """
+        Safely open watermark files. For internal use with :method:`core.DirectoryProcessor.process_single_file`
+        """
+
         if self.dark_watermark is None:
             self.dark_watermark = Image.open(self.dark_watermark_filepath)
         if self.light_watermark is None:
             self.light_watermark = Image.open(self.light_watermark_filepath)
 
-    def _close_watermarks(self):
+    def _close_watermarks(self) -> None:
+        """
+        Safely close watermark files. For internal use with :method:`core.DirectoryProcessor.process_single_file`
+        """
+
         if self.dark_watermark is not None:
             self.dark_watermark.close()
             self.dark_watermark = None
