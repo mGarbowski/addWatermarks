@@ -4,3 +4,4 @@ venv
 
 # Test output
 /tests/photos/with-watermark/
+/tests/resources/sample_photos/with-watermark/

@@ -1,16 +1,17 @@
 import os.path
-from abc import ABC, abstractmethod
+from typing import Optional
 
+import PIL.Image
 from PIL import Image
 
-from core.exceptions import NotSupportedFileFormatException
-from resources.watermarks import DEFAULT_LIGHT_WATERMARK, DEFAULT_DARK_WATERMARK
 from core.corner_pickers import RgbStdevCornerPicker
+from core.exceptions import NotSupportedFileFormatException
 from core.watermark_pickers import WatermarkType, AvgRgbWatermarkPicker
 from core.watermarking import add_watermark, Corner
+from resources.watermarks import DEFAULT_LIGHT_WATERMARK, DEFAULT_DARK_WATERMARK
 
 
-class DirectoryProcessor(ABC):
+class DirectoryProcessor:
     SUPPORTED_PHOTO_FILE_FORMATS = ['.jpg', '.jpeg']
     SUPPORTED_WATERMARK_FILE_FORMATS = ['.png']
 
@@ -31,14 +32,18 @@ class DirectoryProcessor(ABC):
         :param max_width_proportion: [0, 1] maximum watermark / image width ratio
         :param max_height_proportion: [0, 1] maximum watermark / image height ratio
         :param opacity: opacity of the watermark
+        :raises FileNotFoundError: if provided watermark could not be found
+        :raises NotSupportedFileFormatException: if provided watermark's type is not supported
         """
 
         DirectoryProcessor.__validate_watermark_filepath(dark_watermark_filepath)
         DirectoryProcessor.__validate_watermark_filepath(light_watermark_filepath)
 
-        # Opening files not checked
-        self.dark_watermark = Image.open(dark_watermark_filepath)
-        self.light_watermark = Image.open(light_watermark_filepath)
+        # Files will only be loaded when needed
+        self.dark_watermark_filepath = dark_watermark_filepath
+        self.light_watermark_filepath = light_watermark_filepath
+        self.dark_watermark: Optional[PIL.Image.Image] = None
+        self.light_watermark: Optional[PIL.Image.Image] = None
 
         # Parameters passed down
         self.opacity = opacity
@@ -76,22 +81,30 @@ class DirectoryProcessor(ABC):
         :param filepath: path to the watermark file
         """
         if not os.path.exists(filepath):
-            raise ValueError(f"{filepath} does not exist")
+            raise FileNotFoundError(f"{filepath} does not exist")
 
         filename, extension = os.path.splitext(filepath)
         if extension not in DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS:
-            raise ValueError(f"Supplied file of invalid type - {extension}, "
-                             f"supported types: {DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS}")
+            raise NotSupportedFileFormatException(f"Supported file formats for watermarks are: "
+                                                  + f"{', '.join(DirectoryProcessor.SUPPORTED_WATERMARK_FILE_FORMATS)}")
 
-    def process_directory(self, dir_path: str) -> None:
+    def process_directory(self, dir_path: str, output_dir: Optional[str] = None) -> None:
         """
-        Creates a subdirectory in dir_path, adds watermarks to photos and saves them there
+        Adds watermarks to photos in dir_path and saves them in the output_dir.
+        By default, files will be saved in a subdirectory of dir_path
 
         :param dir_path: path to the directory containing photos to process
+        :param output_dir:
         """
 
+        # Loading watermarks
+        if self.dark_watermark is None:
+            self.dark_watermark = Image.open(self.dark_watermark_filepath)
+        if self.light_watermark is None:
+            self.light_watermark = Image.open(self.light_watermark_filepath)
+
         dir_path = os.path.abspath(dir_path)
-        watermarked_dir = os.path.join(dir_path, 'with-watermark')
+        watermarked_dir = os.path.join(dir_path, 'with-watermark') if output_dir is None else output_dir
         try:
             os.mkdir(watermarked_dir)
             print(f"Creating {watermarked_dir}")
@@ -112,16 +125,28 @@ class DirectoryProcessor(ABC):
 
         print(f"Saved all watermarked photos to {watermarked_dir}")
 
-    def process_file(self, filepath: str, output_directory: str) -> None:
+        # Closing watermarks
+        self.dark_watermark.close()
+        self.dark_watermark = None
+        self.light_watermark.close()
+        self.light_watermark = None
+
+    def process_file(self, filepath: str, output_directory: str, suffix: str = "_watermark") -> None:
         """
         Add watermark to a photo and save it in the specified directory.
         Does not modify the original file.
 
+        Requires self.dark_watermark and self.light_watermark to be open
+
         :param filepath: path to the photo to process
         :param output_directory: directory where the processed photo will be saved
+        :param suffix: suffix added to the processed photo's filename
         :raises NotSupportedFileFormatException: if the file format is not supported
         :raises OSError: if the file could not be written
         """
+
+        assert self.dark_watermark is not None
+        assert self.light_watermark is not None
 
         base_filename = os.path.basename(filepath)
         filename, extension = os.path.splitext(base_filename)
@@ -142,50 +167,12 @@ class DirectoryProcessor(ABC):
                                           max_width_proportion=self.max_width_proportion,
                                           max_height_proportion=self.max_height_proportion,
                                           opacity=self.opacity)
-        watermarked_filepath = os.path.join(output_directory, f"{filename}_watermark{extension}")
+        watermarked_filepath = os.path.join(output_directory, f"{filename}{suffix}{extension}")
         watermarked_image.save(watermarked_filepath, quality=100)
         print(f"Added watermark to {base_filename}")
 
         watermarked_image.close()
         image.close()
 
-
-class FlatDirectoryProcessor(DirectoryProcessor):
-    pass
-    # def process_directory(self, dir_path: str) -> None:
-    #     start_dir = os.getcwd()
-    #
-    #     os.chdir(dir_path)
-    #
-    #     watermarked_dir = '../../tests/photos/with-watermark'
-    #     try:
-    #         os.mkdir(watermarked_dir)
-    #     except FileExistsError:
-    #         pass
-    #
-    #     print(f'Adding watermarks to photos in {dir_path}')
-    #     files = os.listdir()
-    #
-    #     for file in files:
-    #         filename, extension = os.path.splitext(file)
-    #         if extension in DirectoryProcessor.SUPPORTED_PHOTO_FILE_FORMATS:
-    #             image = Image.open(file)
-    #             best_corner = self.corner_picker.pick_best_corner(image)
-    #             best_watermark_type = self.watermark_picker.pick_best_watermark(image, best_corner)
-    #             best_watermark = self.dark_watermark if best_watermark_type == WatermarkType.DARK \
-    #                 else self.light_watermark
-    #
-    #             image_with_watermark = add_watermark(image, best_corner, best_watermark,
-    #                                                  self.max_width_proportion, self.max_height_proportion,
-    #                                                  self.opacity)
-    #             image_with_watermark.save(f'{watermarked_dir}/{filename}_watermark{extension}', quality=100)
-    #             print(f'Added watermark to {file}')
-    #
-    #     print(f'Saved all watermarked photos to {dir_path}/{watermarked_dir}')  # TODO: fix log message
-    #     os.chdir(start_dir)
-
 # TODO: Handling of folders and nested folders
 # TODO: Optimize by concurrent processing
-# TODO: Support other file formats
-# TODO: Support providing custom watermarks
-# TODO: Support handling single files

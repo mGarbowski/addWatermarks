@@ -1,8 +1,8 @@
 import tkinter as tk
 from tkinter.ttk import Label, Frame, Style
 
-from core.directory_processors import FlatDirectoryProcessor
-from core.exceptions import NoneSelectedException
+from core.directory_processors import DirectoryProcessor
+from core.exceptions import NoneSelectedException, NotSupportedFileFormatException
 from gui.browse_menu import BrowseMenu
 from gui.config_menu import ConfigMenu
 
@@ -25,6 +25,7 @@ class MainBody(Frame):
     Container for UI components
     Manages the main logic of watermarking photos and displaying status messages
     """
+
     # TODO: refactor not to violate the single responsibility rule
 
     def __init__(self, container: App):
@@ -57,7 +58,7 @@ class MainBody(Frame):
         """
 
         try:
-            processor = FlatDirectoryProcessor(
+            processor = DirectoryProcessor(
                 dark_watermark_filepath=self.config_menu.get_dark_watermark_filepath(),
                 light_watermark_filepath=self.config_menu.get_light_watermark_filepath(),
                 max_width_proportion=self.config_menu.get_width(),
@@ -67,6 +68,10 @@ class MainBody(Frame):
             )
             processor.process_directory(self.browse_menu.get_directory())
             self.set_success_message("Watermarks added successfully")
+        except FileNotFoundError as err:
+            self.set_error_message(str(err))
+        except NotSupportedFileFormatException as exc:
+            self.set_error_message(str(exc))
         except OSError as err:
             self.set_error_message(str(err))
         except ValueError as err:

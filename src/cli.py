@@ -12,7 +12,7 @@ import argparse
 import os
 import sys
 
-from core.directory_processors import FlatDirectoryProcessor
+from core.directory_processors import DirectoryProcessor
 from core.watermarking import Corner
 
 
@@ -77,7 +77,7 @@ def main():
         case 'bottom-right':
             corners = [Corner.LOWER_RIGHT]
 
-    directory_processor = FlatDirectoryProcessor(
+    directory_processor = DirectoryProcessor(
         max_width_proportion=args.width,
         max_height_proportion=args.height,
         opacity=args.opacity,
